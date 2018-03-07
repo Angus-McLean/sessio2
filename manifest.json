@@ -1,0 +1,28 @@
+{
+  "manifest_version": 2,
+  "name": "sessio",
+  "version": "1",
+
+  "content_security_policy": "script-src 'self' https://cdn.firebase.com https://*.firebaseio.com; object-src 'self'; ",
+
+  "background": {
+    "scripts": [
+        "background/background.js"
+    ]
+  },
+
+  "content_scripts": [
+    {
+    "matches" : ["http://*/*", "https://*/*"],
+    "js": ["content/content.js"]
+    }
+    ],
+  "description": "Browser history session organizer",
+  "icons": {},
+  "permissions": [
+		"tabs", "http://*/*", "storage", "unlimitedStorage", "history", "<all_urls>"
+	],
+  "browser_action" : {
+      "default_popup": "public/popout.html"
+  }
+}
