@@ -1,0 +1,21 @@
+{
+  "name": "sessio",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Angus Mclean <angus.mclean@mail.mcgill.ca>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/Angus-McLean/sessio2",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "lodash": "^4.17.5"
+  }
+}
