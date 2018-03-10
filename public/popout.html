@@ -2,9 +2,71 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>popout</title>
+        <title>Main Window</title>
     </head>
+    <style>
+        html, body{
+            margin: 0;
+            width: 400px;
+            height: 400px;
+            background-color: lemonchiffon;
+        }
+        #controller{
+            padding-top: 10px;
+            position: fixed;
+            top: 0px;
+            width: 100%;
+            height: 50px;
+            content: "";
+
+
+            text-align: center;
+        }
+        ul{
+            position: fixed;
+            top: 50px;
+            width: 400px;
+            height: 320px;
+            list-style-type: none;
+            overflow:hidden;
+
+            overflow-y:scroll;
+            border-top: 1px dimgray solid;
+
+            border-bottom: 1px dimgray solid;
+            background-color: white;
+        }
+
+
+        li {
+          padding: 10px;
+          overflow: auto;
+        }
+
+        li:hover {
+          background: #eee;
+          cursor: pointer;
+        }
+
+    </style>
     <body>
-        Hello World !
+        <header>
+            <div id="controller" >
+                  Search Query: <input type="text" name="query" id="query_text"><br>
+                  Number of Results <input type="range" min="1" max="100" value="50" class="slider" id="results">
+
+            </div>
+        </header>
+        <section class="results">
+            <ul id="search_list">
+
+            </ul>
+
+
+        </section>
     </body>
+    <script src="./controllers/controller.js"> </script>
+    <script src="./views/display.js"> </script>
+    <script src="popup.js"></script>
+
 </html>

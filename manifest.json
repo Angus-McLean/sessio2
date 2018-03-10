@@ -7,20 +7,22 @@
 
   "background": {
     "scripts": [
-        "background/background.js"
+        "node_modules/purl/dist/purl.js",
+        "background/back.js"
     ]
   },
 
   "content_scripts": [
     {
     "matches" : ["http://*/*", "https://*/*"],
-    "js": ["content/content.js"]
+    "js": [
+        "content/content.js"]
     }
     ],
   "description": "Browser history session organizer",
   "icons": {},
   "permissions": [
-		"tabs", "http://*/*", "storage", "unlimitedStorage", "history", "<all_urls>"
+		"tabs", "storage", "unlimitedStorage", "history", "<all_urls>"
 	],
   "browser_action" : {
       "default_popup": "public/popout.html"
