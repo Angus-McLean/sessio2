@@ -90,7 +90,8 @@ chrome.runtime.onMessage.addListener(function(message,sender,sendResponse){
 
             chrome.history.search({text:query,maxResults:size}, function(results){
                 console.log("results", results)
-                var full_data = complete_history_data(results)
+                var full_data = add_tree_info_to_data(complete_history_data(results))
+
                 chrome.runtime.sendMessage({fn: "search_update", param: full_data})
             })
             break;
@@ -113,6 +114,15 @@ chrome.tabs.onUpdated.addListener(function (tabId, change, tab) {
 
         // Updating the family_tree
         update_family_tree(tabId,tab);
+
+        // Get the Visit Id, Save corresponding tabId
+        chrome.history.getVisits({
+            url:tab.url
+        }, function (visit){
+
+            var last_visit = visit.pop();
+            tab_for_visitId[last_visit.visitId]=tabId;
+        })
 
         // Updating the tab_visit_log
         tab_visit_log[tabId]=tab.url;
@@ -154,6 +164,12 @@ chrome.history.onVisited.addListener(function (e){
     2. Create an object that stores the page id, url, total activity time, tree id, key words
     3. The visits information can be found by using the history api
 
+
+
+    1. history search:
+        visit time to visit id
+        visit id to tab id
+
 */
 
 
@@ -173,6 +189,36 @@ function complete_history_data(data){
         entry.data = data_of_url[_url];
     });
     console.log(data);
+    return data;
+}
+
+function add_tree_info_to_data(data){
+    //input: Array of incomplete search lists
+    //output: Array of search item
+    data.forEach(function(entry){
+        var _visitTime = entry.lastVisitTime;
+        chrome.history.getVisits({
+            url:entry.url
+        },function(visits){
+            for(var i = visits.length-1;i >= 0;i--){
+                var visit = visits[i];
+                if(visit.visitTime == _visitTime){
+                    var _tab = tab_for_visitId[visit.visitId];
+                    if(family_tree[_tab] != undefined && family_tree[_tab][entry.url] != undefined ){
+                        entry.tree = {
+                            tab: _tab,
+                            visitId: visit.visitId,
+                            referringVisitId: visit.referringVisitId,
+                            transition: visit.transition,
+                            treeId: family_tree[_tab][entry.url].treeId
+                        }
+                    }
+                    //
+                    break;
+                }
+            }
+        });
+    });
     return data;
 }
 
@@ -211,7 +257,7 @@ function update_family_tree (tabId,tab) {
 
             // object dependencies: family_tree, tab_visit_log
 
-            console.log(family_tree,tab_visit_log);
+            //console.log(family_tree,tab_visit_log);
     // if the tab is initialized
     if (family_tree[tabId] == undefined){
         family_tree[tabId] = {
