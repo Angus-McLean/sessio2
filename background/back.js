@@ -96,6 +96,11 @@ chrome.runtime.onMessage.addListener(function(message,sender,sendResponse){
             })
             break;
 
+        case "load_tree":
+            // command to load the family_tree
+            chrome.runtime.sendMessage({fn: "tree_loaded", param: family_tree});
+
+
         default:
             console.log("No match")
 }})
@@ -144,7 +149,7 @@ chrome.history.onVisited.addListener(function (e){
             id : id,
             url : e.url
         }
-        console.table(chrome_id_to_url);
+        // console.table(chrome_id_to_url);
     }
 
     // Updating the information of data_to_url
@@ -267,7 +272,6 @@ function update_family_tree (tabId,tab) {
         family_tree[tabId][tab.url]={
             url: tab.url,
             treeId : "0",
-            parent: "none",
             children: {}
         }
     }
@@ -318,4 +322,17 @@ function save_container_obj(json){
     _keys.forEach(function(key){
         window[key]=json[key];
     })
+}
+
+
+/** - - - - - - - - - CREATING THE WINDOW FOR THE VISUALIZER
+*/
+function create_visual(){
+    chrome.windows.create({
+        type : 'popup',
+        url : "../public/mainWindow.html",
+        type: "popup"
+    }, function(newWindow) {
+
+    });
 }

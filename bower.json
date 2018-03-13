@@ -16,6 +16,8 @@
     "tests"
   ],
   "dependencies": {
-    "lodash": "^4.17.5"
+    "lodash": "^4.17.5",
+    "purl": "^2.3.2",
+    "d3": "^4.13.0"
   }
 }

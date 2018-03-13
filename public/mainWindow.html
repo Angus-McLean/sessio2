@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Sessio - main window</title>
+    </head>
+    <style>
+    html,body{
+        margin: 0;
+        padding: 0;
+    }
+    section{
+      margin: 0;
+      display: flex;
+
+      /* This centers our sketch horizontally. */
+      justify-content: center;
+
+      /* This centers our sketch vertically. */
+      align-items: center;
+    }
+
+    h1{
+        position: absolute;
+        z-index: 99999;
+        font-size: 6vh;
+        padding-top: 0;
+        padding-bottom: 2vh;
+        padding-left: 2vw;
+        text-align: center;
+        margin: auto auto;
+    }
+    nav{
+        position: absolute;
+        padding-top: 6vh;
+        z-index: 99999;
+        text-align: center;
+        margin: auto auto;
+        padding-left: 4vw;
+    }
+    .node circle {
+      fill: #fff;
+      stroke: rgb(100,100,100);
+      stroke-width: 3px;
+    }
+
+    .node text { font: 12px sans-serif; }
+
+    .node--internal text {
+      text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+    }
+
+    .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 2px;
+    }
+    </style>
+
+
+    <body>
+        <h1> Sessio visualizer </h1>
+        <nav>
+            Tab:<select name="tabs" id="optionList">
+
+            </select>
+        </nav>
+
+    </body>
+    <script src="../node_modules/d3/build/d3.min.js"> </script>
+    <script src="../bower_components/lodash/dist/lodash.js"> </script>
+    <script src="../bower_components/purl/purl.js"> </script>
+    <script src="main.js"> </script>
+</html>
