@@ -1,5 +1,15 @@
 console.log("Main loaded");
-var family_tree = {};
+/**  - - - - - --  GLOBAL VARIABLES
+*/
+
+var family_tree = {}; // Stores all the data for the nodes
+
+var complexity = 7; // Sets the minimum number of nodes necessary so that tab
+// is available for display
+
+var tree_map ={}; // Construction plans for d3 trees
+
+var visited_nodes ={}; // JSON used in the Depth First Search
 
 
 /** - - - - - - FUNCTIONS TO LOAD DATA
@@ -70,10 +80,146 @@ document.getElementById("optionList").addEventListener("change", function() {
 */
 
 // We work with d3
-var tree_map ={};
-var visited_nodes ={}
 
-function look_for_id(){
+
+
+
+function init_bfs(id,root_node){
+    // Function to initiate the contruction of the JSON
+    // to display the tree
+
+    if (tree_map[id] != undefined){
+        // The tree_map was already constructed
+    }
+    else{
+        tree_map[id]={
+            name:root_node,
+            children:[]
+        };
+        visited_nodes[id]={}
+
+        bfs(id,tree_map[id],root_node)
+    }
+
+}
+
+function dfs(id,map_obj,node){
+    // Depth First Search Algorithm
+
+    visited_nodes[id][node]=true;
+    var children = Object.keys(family_tree[id][node].children)
+    //console.log(children)
+    for (var i=0; i<children.length;i++){
+        var child = children[i];
+        //console.log("child",child)
+        if (visited_nodes[id][child]==true){
+
+        }
+        else {
+
+            // - - - Begining of Function Execute - - - -
+
+            map_obj.children.push({
+                name:child,
+                children:[]
+            })
+
+            // - - - End of Function - - - -
+
+            // console.log("bfs('%s','%s','%s')",id,map_obj.children[map_obj.children.length-1],node);
+
+            bfs(id,map_obj.children[map_obj.children.length-1],child)
+        }
+    }
+
+
+}
+
+
+function if_complex_tree(tab){
+    // Function to filter tab that dont possess enough nodes
+    if(Object.keys(family_tree[tab]).length>complexity+2){
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+
+
+
+function all_d3(){
+    // Function that contains all the display code for the tree
+
+    // set the dimensions and margins of the diagram
+    var margin = {top: 100, right: 90, bottom: 50, left: 90},
+    width = innerWidth - margin.left - margin.right,
+    height = innerHeight - margin.top - margin.bottom;
+
+    // declares a tree layout and assigns the size
+    var treemap = d3.tree()
+    .size([width, height]);
+
+    //  assigns the data to a hierarchy using parent-child relationships
+    var nodes = d3.hierarchy(treeData);
+
+    // maps the node data to the tree layout
+    nodes = treemap(nodes);
+
+    // append the svg obgect to the body of the page
+    // appends a 'group' element to 'svg'
+    // moves the 'group' element to the top left margin
+    var svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom),
+    g = svg.append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    // adds the links between the nodes
+    var link = g.selectAll(".link")
+    .data( nodes.descendants().slice(1))
+    .enter().append("path")
+    .attr("class", "link")
+    .attr("d", function(d) {
+       return "M" + d.x + "," + d.y
+         + "C" + d.x + "," + (d.y + d.parent.y) / 2
+         + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
+         + " " + d.parent.x + "," + d.parent.y;
+       });
+
+    // adds each node as a group
+    var node = g.selectAll(".node")
+    .data(nodes.descendants())
+    .enter().append("g")
+    .attr("class", function(d) {
+      return "node" +
+        (d.children ? " node--internal" : " node--leaf"); })
+    .attr("transform", function(d) {
+      return "translate(" + d.x + "," + d.y + ")"; });
+
+    // adds the circle to the node
+    node.append("circle")
+    .attr("r", 20);
+
+    // adds the text to the node
+    node.append("text")
+    .attr("dy", ".35em")
+    .attr("y", function(d) { return d.children ? -20 : 20; })
+    .style("text-anchor", "middle")
+    .text(function(d) { return purl(d.data.name).data.attr.host; });
+}
+
+
+
+/** - - - - - - - - - UTILITIES FUNCTIONS
+*/
+
+
+function sort_tabs_by_node_count(){
+    // Returns a sorted array of the tabs with the most nodes
+
     var id_arr = [];
     var _ids = Object.keys(family_tree);
     _ids.forEach(function(_id){
@@ -94,118 +240,4 @@ function look_for_id(){
     })
 
     return id_arr;
-}
-
-function init_bfs(id,root_node){
-
-    tree_map[id]={
-        name:root_node,
-        children:[]
-    };
-    visited_nodes[id]={}
-
-    bfs(id,tree_map[id],root_node)
-}
-
-function bfs(id,map_obj,node){
-    visited_nodes[id][node]=true;
-    var children = Object.keys(family_tree[id][node].children)
-    //console.log(children)
-    for (var i=0; i<children.length;i++){
-        var child = children[i];
-        //console.log("child",child)
-        if (visited_nodes[id][child]==true){
-
-        }
-        else {
-            //console.log("map_obj",map_obj)
-            map_obj.children.push({
-                name:child,
-                children:[]
-            })
-
-
-            console.log("bfs('%s','%s','%s')",id,map_obj.children[map_obj.children.length-1],node);
-
-            bfs(id,map_obj.children[map_obj.children.length-1],child)
-        }
-    }
-
-
-}
-var complexity = 7; // Sets the minimum number of nodes necessary so that tab
-// is available for display
-
-function if_complex_tree(tab){
-    if(Object.keys(family_tree[tab]).length>complexity+2){
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-
-
-
-function all_d3(){
-
-
-// set the dimensions and margins of the diagram
-var margin = {top: 100, right: 90, bottom: 50, left: 90},
-width = 660 - margin.left - margin.right,
-height = 500 - margin.top - margin.bottom;
-
-// declares a tree layout and assigns the size
-var treemap = d3.tree()
-.size([width, height]);
-
-//  assigns the data to a hierarchy using parent-child relationships
-var nodes = d3.hierarchy(treeData);
-
-// maps the node data to the tree layout
-nodes = treemap(nodes);
-
-// append the svg obgect to the body of the page
-// appends a 'group' element to 'svg'
-// moves the 'group' element to the top left margin
-var svg = d3.select("body").append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom),
-g = svg.append("g")
-  .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
-
-// adds the links between the nodes
-var link = g.selectAll(".link")
-.data( nodes.descendants().slice(1))
-.enter().append("path")
-.attr("class", "link")
-.attr("d", function(d) {
-   return "M" + d.x + "," + d.y
-     + "C" + d.x + "," + (d.y + d.parent.y) / 2
-     + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
-     + " " + d.parent.x + "," + d.parent.y;
-   });
-
-// adds each node as a group
-var node = g.selectAll(".node")
-.data(nodes.descendants())
-.enter().append("g")
-.attr("class", function(d) {
-  return "node" +
-    (d.children ? " node--internal" : " node--leaf"); })
-.attr("transform", function(d) {
-  return "translate(" + d.x + "," + d.y + ")"; });
-
-// adds the circle to the node
-node.append("circle")
-.attr("r", 10);
-
-// adds the text to the node
-node.append("text")
-.attr("dy", ".35em")
-.attr("y", function(d) { return d.children ? -20 : 20; })
-.style("text-anchor", "middle")
-.text(function(d) { return purl(d.data.name).data.attr.host; });
 }
