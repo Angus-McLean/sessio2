@@ -1,4 +1,6 @@
 Make use of:
     -chrome options page
     -chrome notification system
-    -chrome internationalization function 
+    -chrome internationalization function
+    -chrome bookmark dev
+    

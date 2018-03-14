@@ -22,7 +22,7 @@
   "description": "Browser history session organizer",
   "icons": {},
   "permissions": [
-		"tabs", "storage", "unlimitedStorage", "history", "<all_urls>", "webNavigation"
+		"tabs", "storage", "unlimitedStorage", "history", "<all_urls>", "webNavigation","bookmarks"
 	],
   "browser_action" : {
       "default_popup": "public/popout.html"

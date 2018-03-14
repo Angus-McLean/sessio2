@@ -11,6 +11,8 @@ var tree_map ={}; // Construction plans for d3 trees
 
 var visited_nodes ={}; // JSON used in the Depth First Search
 
+var url_to_id = {};
+
 
 /** - - - - - - FUNCTIONS TO LOAD DATA
 */
@@ -28,9 +30,9 @@ chrome.runtime.onMessage.addListener(function(message,sender,sendResponse){
         console.log(message.param)
         family_tree = message.param;
         load_tabs();
-        init_bfs("310","chrome://newtab/");
-        treeData = tree_map["310"];
-        all_d3();
+        init_dfs("300","chrome://newtab/");
+        treeData = tree_map["300"];
+        redraw();
 
     }
 }
@@ -67,13 +69,11 @@ function add_options(all_tabs){
 document.getElementById("optionList").addEventListener("change", function() {
     console.log("Displaying TAB:", this.value);
     var tab=this.value;
-    var svgs = document.getElementsByTagName("svg");
-    for(var j= 0 ; j<svgs.length;j++){
-        svgs[j].parentNode.removeChild(svgs[j]);
-    }
-    init_bfs(tab,family_tree[tab].root);
+
+
+    init_dfs(tab,family_tree[tab].root);
     treeData = tree_map[tab];
-    all_d3();
+    redraw();
 });
 
 /** - - - - - - - - DATA PROCESSING FUNCTIONS
@@ -83,8 +83,8 @@ document.getElementById("optionList").addEventListener("change", function() {
 
 
 
-
-function init_bfs(id,root_node){
+var counter = 0;
+function init_dfs(id,root_node){
     // Function to initiate the contruction of the JSON
     // to display the tree
 
@@ -98,14 +98,15 @@ function init_bfs(id,root_node){
         };
         visited_nodes[id]={}
 
-        bfs(id,tree_map[id],root_node)
+        dfs(id,tree_map[id],root_node)
     }
 
 }
 
 function dfs(id,map_obj,node){
     // Depth First Search Algorithm
-
+    counter++;
+    url_to_id[node]=counter;
     visited_nodes[id][node]=true;
     var children = Object.keys(family_tree[id][node].children)
     //console.log(children)
@@ -126,13 +127,11 @@ function dfs(id,map_obj,node){
 
             // - - - End of Function - - - -
 
-            // console.log("bfs('%s','%s','%s')",id,map_obj.children[map_obj.children.length-1],node);
+            // console.log("dfs('%s','%s','%s')",id,map_obj.children[map_obj.children.length-1],node);
 
-            bfs(id,map_obj.children[map_obj.children.length-1],child)
+            dfs(id,map_obj.children[map_obj.children.length-1],child)
         }
     }
-
-
 }
 
 
@@ -147,15 +146,20 @@ function if_complex_tree(tab){
 }
 
 
+var svg;
 
-
-function all_d3(){
+function redraw(){
+    var svgs = document.getElementsByTagName("svg");
+    for(var j= 0 ; j<svgs.length;j++){
+        svgs[j].parentNode.removeChild(svgs[j]);
+    }
+    svg = d3.select("#right_panel").append("svg").attr("id","visual_svg");
     // Function that contains all the display code for the tree
 
     // set the dimensions and margins of the diagram
-    var margin = {top: 100, right: 90, bottom: 50, left: 90},
-    width = innerWidth - margin.left - margin.right,
-    height = innerHeight - margin.top - margin.bottom;
+    var margin = {top: 100, right: 10, bottom: 100, left: 10},
+    width = innerWidth - margin.left - margin.right -300,
+    height = innerHeight - margin.top - margin.bottom-50;
 
     // declares a tree layout and assigns the size
     var treemap = d3.tree()
@@ -170,13 +174,14 @@ function all_d3(){
     // append the svg obgect to the body of the page
     // appends a 'group' element to 'svg'
     // moves the 'group' element to the top left margin
-    var svg = d3.select("body").append("svg")
-      .attr("width", width + margin.left + margin.right)
+
+
+      svg.attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom),
     g = svg.append("g")
       .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
-
+    console.log(nodes.descendants().slice(1))
     // adds the links between the nodes
     var link = g.selectAll(".link")
     .data( nodes.descendants().slice(1))
@@ -194,14 +199,30 @@ function all_d3(){
     .data(nodes.descendants())
     .enter().append("g")
     .attr("class", function(d) {
+        //console.log(d)
       return "node" +
         (d.children ? " node--internal" : " node--leaf"); })
     .attr("transform", function(d) {
       return "translate(" + d.x + "," + d.y + ")"; });
 
+    node.append("circle")
+    .attr("id",function(d){
+        return "hi_"+url_to_id[d.data.name];
+    })
+    .attr("class","highlight")
+    .style("opacity",1)
+    .attr("r", 15);
+
+
     // adds the circle to the node
     node.append("circle")
-    .attr("r", 20);
+    .attr("class","circle")
+    .attr("r", 15)
+    .on("click",function(d){
+        d3.select("#hi_"+url_to_id[d.data.name])
+        .style("opacity",1)
+        .attr("r",20)
+    });
 
     // adds the text to the node
     node.append("text")
@@ -209,8 +230,61 @@ function all_d3(){
     .attr("y", function(d) { return d.children ? -20 : 20; })
     .style("text-anchor", "middle")
     .text(function(d) { return purl(d.data.name).data.attr.host; });
+
+    svg.on("mousedown",function(){
+        var begin_coord = d3.mouse(this);
+
+        svg.append("rect")
+            .attr("id","selec_box")
+            .attr("x",begin_coord[0])
+            .attr("y",begin_coord[1])
+            .attr("width",0)
+            .attr("height",0);
+
+
+            svg.on("mousemove", mousemove)
+            .on("mouseup", mouseup);
+
+            d3.event.preventDefault();
+
+            function mousemove(){
+                var new_coord = d3.mouse(this);
+
+                if(begin_coord[0]<new_coord[0]){
+                    d3.select("#selec_box")
+                    .attr("x",begin_coord[0])
+                    .attr("width",new_coord[0]-begin_coord[0])
+                }
+                else {
+                    d3.select("#selec_box")
+                    .attr("x",new_coord[0])
+                    .attr("width",begin_coord[0]-new_coord[0])
+                }
+
+                if(begin_coord[1]<new_coord[1]){
+                    d3.select("#selec_box")
+                    .attr("y",begin_coord[1])
+                    .attr("height",new_coord[1]-begin_coord[1])
+                }
+                else {
+                    d3.select("#selec_box")
+                    .attr("y",new_coord[1])
+                    .attr("height",begin_coord[1]-new_coord[1])
+                }
+
+            }
+
+            function mouseup(){
+                svg.on("mousemove", null).on("mouseup", null);
+                d3.select("#selec_box").remove();
+
+            }
+    });
 }
 
+
+
+window.addEventListener("resize", redraw);
 
 
 /** - - - - - - - - - UTILITIES FUNCTIONS
