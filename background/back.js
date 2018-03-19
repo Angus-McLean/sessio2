@@ -246,6 +246,10 @@ function get_url_from_id (_id){
     history_obj[_id].url;
 }
 
+// Creating Chrome Bookmarks
+
+
+
 
 /** - - - - - - - - - - - - FUNCTIONS TO ACQUIRE DATA
 */

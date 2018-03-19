@@ -13,7 +13,7 @@ console.log("Content Script working");
     */
 
 
-chrome.extension.onMessage.addListener(function(request, sender, sendResponse)
+chrome.extension.onMessage.addListener(function(request, sender, sendResponse){
 	if(request.fn = "gatherText") {
         console.log(request);
         var text = getText();
@@ -24,8 +24,11 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse)
 	}
 })
 
+function test_function (){
+	console.log("IT RAN THE FUNCTION !");
+}
 
-
+test_function()
 
 
 
@@ -73,3 +76,24 @@ document.addEventListener('click', function(clickEvent){
       console.log(response.farewell);
     });
 }, true);
+
+/* - - - - - - SCRIPT TO INJECT A JS FILE IN THE WEBPAGES
+*/
+
+// Injecting a file that is whitelisted in the manifest file
+var s = document.createElement('script');
+s.src = chrome.extension.getURL("content/injections/load.js");
+(document.head||document.documentElement).appendChild(s);
+s.parentNode.removeChild(s);
+
+
+// Adding an event listener when the webpage posts a message
+window.addEventListener("message", function(event) {
+    // We only accept messages from ourselves
+    if (event.source != window)
+        return;
+
+    if (event.data.type && (event.data.type == "FROM_PAGE")) {
+        console.log("Content script received message: " + event.data.text);
+    }
+});

@@ -40,3 +40,6 @@ function clear_list(){
     }
 
 }
+
+/** - - - - - - - - - - - - - - SESSION LAUNCHER
+*/

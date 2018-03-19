@@ -20,11 +20,13 @@
     }
     ],
   "description": "Browser history session organizer",
-  "icons": {},
+  "icons": {"48": "logos/sessio48.png",
+  "64":"logos/sessio.png"},
   "permissions": [
 		"tabs", "storage", "unlimitedStorage", "history", "<all_urls>", "webNavigation","bookmarks"
 	],
   "browser_action" : {
       "default_popup": "public/popout.html"
-  }
+  },
+   "web_accessible_resources": ["content/injections/load.js"]
 }
